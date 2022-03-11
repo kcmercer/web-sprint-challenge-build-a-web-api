@@ -1,23 +1,23 @@
 // Write your "actions" router here!
 const router = require('express').Router();
-const Actions = require('./actions-model');
-const { validateActionId, validateAction } = require('./actions-middlware');
+const Action = require('./actions-model');
+const { verifyId, verifyAction } = require('./actions-middlware');
 
 router.get('/', (req, res, next) => {
-  Actions.get()
+    Action.get()
       .then(actions => {
           res.status(200).json(actions);
       })
       .catch(next)
 });
 
-router.get('/:id', validateActionId, (req, res) => {
+router.get('/:id', verifyId, (req, res) => {
   res.json(req.action)
 
 });
 
-router.post('/',validateActionId, validateAction, (req, res, next) => {
-  Actions.insert(req.body)
+router.post('/',verifyId, verifyAction, (req, res, next) => {
+    Action.insert(req.body)
       .then(newAction => {
           res.status(201).json(newAction)
       })
@@ -25,9 +25,9 @@ router.post('/',validateActionId, validateAction, (req, res, next) => {
 
 });
 
-router.put('/:id', validateActionId, validateAction, (req, res, next) => {
+router.put('/:id', verifyId, verifyAction, (req, res, next) => {
   if (req.body.completed || req.body.completed === false) {
-      Actions.update(req.params.id, req.body)
+    Action.update(req.params.id, req.body)
           .then(action => {
               res.json(action)
           })
@@ -39,9 +39,9 @@ router.put('/:id', validateActionId, validateAction, (req, res, next) => {
   }
 });
 
-router.delete('/:id', validateActionId, async (req, res, next) => {
+router.delete('/:id', verifyId, async (req, res, next) => {
   try {
-      await Actions.remove(req.params.id)
+      await Action.remove(req.params.id)
       res.json(req.action)
   } catch (err) {
       next(err)
