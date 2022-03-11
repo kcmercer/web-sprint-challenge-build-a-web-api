@@ -1,27 +1,29 @@
 // add middlewares here related to actions
 const Action = require('./actions-model');
 
-const verifyId = (req, res, next) => {
-  Action.get(req.params.id)
-    .then(action => {
-      if (!action) {
-        res.status(404).json({ message: `Unable to locate action ${req.params.id}`})
-      } else {
-          req.action = action
-          next()
-      }
-    })
-    .catch(err => console.log(err))
+async function verifyId(req, res, next) {
+    try {
+        const action = await Action.get(req.params.id);
+        if (!action) {
+            res.status(404).json({ message: 'Action does not exist' });
+        } else {
+            req.action = action;
+            next();
+        }
+    } catch (err) {
+        res.status(404).json({ message: 'Unable to locate action' })
+
+    }
+}
+function verifyAction (req, res, next) {
+    const {project_id, description, notes } = req.body;
+    if (!project_id || !description || !notes) {
+        res.status(400).json({ message: 'Please provide a name and description' });
+    } else {
+        req.description = description.trim();
+        req.notes = notes.trim();
+        next();
+    }
 }
 
-const verifyPayload = (req, res, next) => {
-  const { project_id, description, notes } = req.body
-
-  if (!project_id || !notes || !notes.trim()|| !description || !description.trim()) {
-    res.status(400).json({ message: 'Please provide a project id, notes and description' })
-  } else {
-    next()
-  }
-}
-
-module.exports = { verifyId, verifyPayload }
+module.exports = { verifyId, verifyAction };
